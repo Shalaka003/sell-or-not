@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell or Not? - Quick Price Estimator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e53238 0%, #0064d2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #e53238;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .tagline {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0064d2;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #e53238 0%, #f05a28 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 50, 56, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            border-left: 5px solid #0064d2;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .price-display {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #0064d2;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .price-range {
+            font-size: 1.1em;
+            color: #555;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #856404;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .price-display {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sell or Not?</h1>
+        <p class="tagline">Quick price estimator for casual sellers. Enter your item details and find out what you could get for it.</p>
+
+        <form id="priceForm">
+            <div class="form-group">
+                <label for="itemName">Item Name / Title</label>
+                <input type="text" id="itemName" placeholder="e.g., iPhone 13 Pro" required>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="brand">Brand</label>
+                    <input type="text" id="brand" placeholder="e.g., Apple" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="condition">Condition</label>
+                    <select id="condition" required>
+                        <option value="new">New</option>
+                        <option value="like-new">Like New</option>
+                        <option value="good" selected>Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="model">Model (optional)</label>
+                    <input type="text" id="model" placeholder="e.g., A2483">
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" min="0" max="50" step="0.5" placeholder="e.g., 2" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="size">Size (optional)</label>
+                    <input type="text" id="size" placeholder="e.g., 128GB, Large">
+                </div>
+
+                <div class="form-group">
+                    <label for="color">Color (optional)</label>
+                    <input type="text" id="color" placeholder="e.g., Graphite">
+                </div>
+            </div>
+
+            <button type="submit">Estimate Price</button>
+        </form>
+
+        <div class="result" id="result">
+            <div class="price-display" id="priceDisplay">$0</div>
+            <div class="price-range" id="priceRange">Estimated range: $0 - $0</div>
+            <div class="info-text" id="infoText"></div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Note:</strong> This is a prototype estimator. In a full version, this tool would use live marketplace data via API to provide real-time pricing based on similar items currently listed and recently sold.
+        </div>
+    </div>
+
+    <script>
+        // Simple price estimation logic based on item characteristics
+        document.getElementById('priceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const itemName = document.getElementById('itemName').value.toLowerCase();
+            const brand = document.getElementById('brand').value.toLowerCase();
+            const condition = document.getElementById('condition').value;
+            const age = parseFloat(document.getElementById('age').value);
+            const model = document.getElementById('model').value;
+            const size = document.getElementById('size').value.toLowerCase();
+            const color = document.getElementById('color').value;
+
+            // Base price estimation logic
+            let basePrice = 50; // Default base
+
+            // Category detection and base pricing
+            if (itemName.includes('phone') || itemName.includes('iphone') || itemName.includes('samsung') || itemName.includes('galaxy')) {
+                basePrice = 300;
+                if (brand.includes('apple') || brand.includes('samsung')) basePrice = 450;
+            } else if (itemName.includes('laptop') || itemName.includes('macbook') || itemName.includes('computer')) {
+                basePrice = 500;
+                if (brand.includes('apple') || brand.includes('mac')) basePrice = 800;
+            } else if (itemName.includes('watch') || itemName.includes('smartwatch')) {
+                basePrice = 150;
+                if (brand.includes('apple')) basePrice = 250;
+            } else if (itemName.includes('tablet') || itemName.includes('ipad')) {
+                basePrice = 250;
+                if (brand.includes('apple')) basePrice = 350;
+            } else if (itemName.includes('camera') || itemName.includes('lens')) {
+                basePrice = 300;
+                if (brand.includes('canon') || brand.includes('nikon') || brand.includes('sony')) basePrice = 450;
+            } else if (itemName.includes('shoe') || itemName.includes('sneaker') || itemName.includes('boot')) {
+                basePrice = 60;
+                if (brand.includes('nike') || brand.includes('jordan') || brand.includes('adidas')) basePrice = 100;
+            } else if (itemName.includes('bag') || itemName.includes('purse') || itemName.includes('backpack')) {
+                basePrice = 40;
+                if (brand.includes('gucci') || brand.includes('louis') || brand.includes('prada') || brand.includes('coach')) basePrice = 300;
+            } else if (itemName.includes('console') || itemName.includes('playstation') || itemName.includes('xbox') || itemName.includes('nintendo')) {
+                basePrice = 250;
+            }
+
+            // Adjust for condition
+            const conditionMultipliers = {
+                'new': 1.0,
+                'like-new': 0.85,
+                'good': 0.65,
+                'fair': 0.45,
+                'poor': 0.25
+            };
+            let adjustedPrice = basePrice * conditionMultipliers[condition];
+
+            // Age depreciation (roughly 15% per year, capped)
+            const depreciationRate = 0.15;
+            const ageMultiplier = Math.max(0.2, 1 - (age * depreciationRate));
+            adjustedPrice *= ageMultiplier;
+
+            // Storage/size bonus for electronics
+            if (size.includes('256') || size.includes('512') || size.includes('1tb')) {
+                adjustedPrice *= 1.15;
+            } else if (size.includes('128')) {
+                adjustedPrice *= 1.05;
+            }
+
+            // Calculate range (±20%)
+            const lowPrice = Math.round(adjustedPrice * 0.8);
+            const highPrice = Math.round(adjustedPrice * 1.2);
+            const midPrice = Math.round(adjustedPrice);
+
+            // Display results
+            document.getElementById('priceDisplay').textContent = `$${midPrice}`;
+            document.getElementById('priceRange').textContent = `Estimated range: $${lowPrice} - $${highPrice}`;
+
+            // Generate contextual message
+            let message = '';
+            if (midPrice >= 100) {
+                message = `This looks like a worthwhile item to list! Based on the ${condition} condition and ${age} year age, you could expect reasonable returns.`;
+            } else if (midPrice >= 30) {
+                message = `Moderate value item. Consider your listing effort vs. expected return of around $${midPrice}.`;
+            } else {
+                message = `Lower value estimate. You might want to consider donating or bundling with similar items for better value.`;
+            }
+            document.getElementById('infoText').textContent = message;
+
+            // Show result with animation
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('show');
+            setTimeout(() => {
+                resultDiv.classList.add('show');
+            }, 10);
+        });
+    </script>
+</body>
+</html>
